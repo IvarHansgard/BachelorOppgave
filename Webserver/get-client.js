@@ -16,11 +16,11 @@ module.exports.getClient = async () => {
        
         //Enter database details
         ///*
-        host: 'pgtsdb.102015619-10.ffp.sintef.no',
-        port: '5432',
-        user: 'agrisolar_skjetlein',
-        password: 'SkjetleinGard#2023',
-        database: 'postgres',
+        host: 'database url',
+        port: 'port',
+        user: 'username',
+        password: 'password',
+        database: 'database name',
         //*/
         ssl: true,
       });
