@@ -1,5 +1,5 @@
 # BachelorOppgave
-Kode til bacheloroppgaven for SINTEF Industri. 
+Kode til bacheloroppgaven for SINTEF Industri. \n
 Tittel: Modulære soldrevne bokser for innsamling av sensordata
 tilknyttet et trådløst LoraWAN nettverk
 
