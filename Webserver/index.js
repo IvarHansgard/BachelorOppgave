@@ -1,3 +1,11 @@
+//SOURCES
+/* This code is based on these guides
+Connecting and inserting data into postgreSQL
+- https://northflank.com/guides/connecting-to-a-postgresql-database-using-node-js
+Consuming and formating JSON webhooks
+- https://medium.com/@BearerSH/consuming-webhooks-with-node-js-and-express-50e007fc7ae2
+*/
+
 //js file for connecting to database
 const { getClient } = require('./get-client');
 
