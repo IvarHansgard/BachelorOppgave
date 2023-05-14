@@ -8,3 +8,5 @@ Bachelor oppgaven består av kode til
 - En NodeJS webserver for innhenting av webhooks fra The Things Stack og som legger inn data i en database
 - Et payload formatting script til The Thing Stack for formatering av webhook
 
+I tilegg til dette er det også filer for 3D-printing av deler til sensorer og innsiden av sensorboksen. 
+
