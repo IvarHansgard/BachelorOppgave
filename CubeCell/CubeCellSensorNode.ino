@@ -3,18 +3,30 @@
  * Created by Ivar Hansgård and Marius B Marthinsen.
  * The purpose of the program is to collect data from diffrent sensors and send it to thingstack thru LoRaWAN. 
  * The program can be modified to include more sensors or to change out sensors, see guide --> 
+ * https://soldrevne-sensorbokser.gitbook.io/agrivoltaics-sensorboxes-documentation/?fbclid=IwAR3VUQUcgZCHTAPZnGTZKMgJ8DO0GakS-EMYXsXnoaGo5td8hl_pqnvlNjA
  */
 
 #include "Arduino.h"
 #include "LoRaWan_APP.h" //Lorawan, communication library.
 #include <Wire.h>        //I2c communcation library.
 
+
 // include
 #include <BH1750.h>            // Lightsensor bh1750 library.
-#include <Adafruit_AS7341.h>   // Multispecter sensor AS7341 library. 
+// BH1750 library by Christopher Laws. Guide: https://randomnerdtutorials.com/arduino-bh1750-ambient-light-sensor/ 
+
+#include <Adafruit_AS7341.h>   // Multispecter sensor AS7341 library.
+//Adafruit AS7341 library. Guide: https://learn.adafruit.com/adafruit-as7341-10-channel-light-color-sensor-breakout/arduino 
+
 #include "ADS1X15.h"           // Analog to digital converter  ads1115 library. ADC is connected to SEN0193 soil moisture sensor.
+// Ads1X15-WE library by Rob tillaart. Guide: https://github.com/RobTillaart/ADS1X15  
+
 #include "SCD30.h"             // Co2, temperature and humidity sensor SCD30 library.
+// Seeed SCD30 Library. Guide: https://github.com/Seeed-Studio/Seeed_SCD30 
+
 #include "Adafruit_MCP9600.h"  // mcp9600 termocouple i2c amplifier.
+// Adafruit MCP9600 library. Guide https://learn.adafruit.com/adafruit-mcp9600-i2c-thermocouple-amplifier 
+
 
 // i2c addresses
 #define TCAADDR 0x70    // I2c multiplexer address 0x70 in hex, 112 in decimal.
