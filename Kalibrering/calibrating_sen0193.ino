@@ -1,4 +1,4 @@
-// created by using resources form https://how2electronics.com/interface-capacitive-soil-moisture-sensor-arduino/#Capacitive_Soil_Moisture_Sensor_Calibration
+// created by using resources from https://how2electronics.com/interface-capacitive-soil-moisture-sensor-arduino/#Capacitive_Soil_Moisture_Sensor_Calibration
 // and https://wiki.dfrobot.com/Capacitive_Soil_Moisture_Sensor_SKU_SEN0193 '
 // use this calibration to find airvalue and watervalue to create a lowest value, highest value.
 // the function will use these values to create a % of how wet the ground is.
