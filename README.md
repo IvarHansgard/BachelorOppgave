@@ -10,3 +10,4 @@ Bachelor oppgaven består av kode til
 
 I tilegg til dette er det også filer for 3D-printing av deler til sensorer og innsiden av sensorboksen. 
 
+Laget av: Ivar Hansgård og Marius Marthinsen
