@@ -1,10 +1,10 @@
 /*
- * This program is created for CubeCell - Dev-Board(V2) HTCC-AB01(V2)
- * Created by Ivar Hansgård and Marius B Marthinsen.
- * The purpose of the program is to collect data from diffrent sensors and send it to thingstack thru LoRaWAN. 
- * The program can be modified to include more sensors or to change out sensors, see guide --> 
- * https://soldrevne-sensorbokser.gitbook.io/agrivoltaics-sensorboxes-documentation/?fbclid=IwAR3VUQUcgZCHTAPZnGTZKMgJ8DO0GakS-EMYXsXnoaGo5td8hl_pqnvlNjA
- */
+   This program is created for CubeCell - Dev-Board(V2) HTCC-AB01(V2)
+   Created by Ivar Hansgård and Marius B Marthinsen.
+   The purpose of the program is to collect data from diffrent sensors and send it to thingstack thru LoRaWAN.
+   The program can be modified to include more sensors or to change out sensors, see guide -->
+   https://soldrevne-sensorbokser.gitbook.io/agrivoltaics-sensorboxes-documentation/?fbclid=IwAR3VUQUcgZCHTAPZnGTZKMgJ8DO0GakS-EMYXsXnoaGo5td8hl_pqnvlNjA
+*/
 
 #include "Arduino.h"
 #include "LoRaWan_APP.h" //Lorawan, communication library.
@@ -13,19 +13,19 @@
 
 // include
 #include <BH1750.h>            // Lightsensor bh1750 library.
-// BH1750 library by Christopher Laws. Guide: https://randomnerdtutorials.com/arduino-bh1750-ambient-light-sensor/ 
+// BH1750 library by Christopher Laws. Guide: https://randomnerdtutorials.com/arduino-bh1750-ambient-light-sensor/
 
 #include <Adafruit_AS7341.h>   // Multispecter sensor AS7341 library.
-//Adafruit AS7341 library. Guide: https://learn.adafruit.com/adafruit-as7341-10-channel-light-color-sensor-breakout/arduino 
+//Adafruit AS7341 library. Guide: https://learn.adafruit.com/adafruit-as7341-10-channel-light-color-sensor-breakout/arduino
 
 #include "ADS1X15.h"           // Analog to digital converter  ads1115 library. ADC is connected to SEN0193 soil moisture sensor.
-// Ads1X15-WE library by Rob tillaart. Guide: https://github.com/RobTillaart/ADS1X15  
+// Ads1X15-WE library by Rob tillaart. Guide: https://github.com/RobTillaart/ADS1X15
 
 #include "SCD30.h"             // Co2, temperature and humidity sensor SCD30 library.
-// Seeed SCD30 Library. Guide: https://github.com/Seeed-Studio/Seeed_SCD30 
+// Seeed SCD30 Library. Guide: https://github.com/Seeed-Studio/Seeed_SCD30
 
 #include "Adafruit_MCP9600.h"  // mcp9600 termocouple i2c amplifier.
-// Adafruit MCP9600 library. Guide https://learn.adafruit.com/adafruit-mcp9600-i2c-thermocouple-amplifier 
+// Adafruit MCP9600 library. Guide https://learn.adafruit.com/adafruit-mcp9600-i2c-thermocouple-amplifier
 
 
 // i2c addresses
@@ -51,7 +51,6 @@ int32_t data_array_6[12];
 int32_t data_array_7[12];
 
 
-
 // declaring sensor arrays and variables for use:
 //Arrays
 int32_t multispecter_sensor_value[10];  // Data element order,wavelength nm:415,445,480,515,555,590,630,680,clear,nir. Multispecter sensor sensor AS7341.
@@ -63,6 +62,13 @@ int32_t sensor_value_mcp9600;           // variable to store snesor values from 
 
 
 uint8_t packageNum = 0;
+
+#define timetillsleep 180000
+#define timetillwakeup 3600000    // sleeping time in ms, 3,6*10^6 = 60min.
+static TimerEvent_t sleep;
+static TimerEvent_t wakeUp;
+uint8_t lowpower = 1;
+
 
 
 
@@ -316,6 +322,32 @@ static void prepareTxFrame( uint8_t port, uint8_t sending_data)
 
 // ----------------------------
 
+void onSleep()
+{
+  Serial.printf("Going into lowpower mode, %d ms later wake up.\r\n", timetillwakeup);
+  Serial.println(".");
+  lowpower = 1;
+  //timetillwakeup ms later wake up;
+  TimerSetValue( &wakeUp, timetillwakeup );
+  TimerStart( &wakeUp );
+}
+void onWakeUp()
+{
+  Serial.printf("Woke up, %d ms later into lowpower mode.\r\n", timetillsleep);
+  Serial.println(".");
+  lowpower = 0;
+  packageNum = 0;
+  //timetillsleep ms later into lowpower mode;
+  TimerSetValue( &sleep, timetillsleep );
+  TimerStart( &sleep );
+}
+
+
+
+
+//--------------------------
+
+
 // Functions for i2c multiplexer TCA9548
 // Both functions was created by using resources from https://learn.adafruit.com/adafruit-tca9548a-1-to-8-i2c-multiplexer-breakout/arduino-wiring-and-test.
 
@@ -497,7 +529,7 @@ void fill_data_array(int i, int32_t sensor_array[12])
 
       scd30.initialize();
       delay(500);
-      
+
       if (scd30.isAvailable())
       {
 
@@ -608,69 +640,79 @@ void setup() {
 #endif
   deviceState = DEVICE_STATE_INIT;
   LoRaWAN.ifskipjoin();
+
+
+  Radio.Sleep( );
+  TimerInit( &sleep, onSleep );
+  TimerInit( &wakeUp, onWakeUp );
+  onWakeUp();
 }
 
 
 void loop()
 {
-  switch ( deviceState )
-  {
-    case DEVICE_STATE_INIT:
-      {
-#if(AT_SUPPORT)
-        getDevParam();
-#endif
-        printDevParam();
-        LoRaWAN.init(loraWanClass, loraWanRegion);
-        deviceState = DEVICE_STATE_JOIN;
-        break;
-      }
-    case DEVICE_STATE_JOIN:
-      {
-        LoRaWAN.join();
-        break;
-      }
-    case DEVICE_STATE_SEND:
-      {
-        if (packageNum == 0 )
-        {
-          get_sensor_data();
-        }
 
-        delay(500);
-        prepareTxFrame(appPort, packageNum);
-        LoRaWAN.send();
-        packageNum++;
-        if (packageNum == 7) //change this to 9 if you want to add two more connectors
-        {
-          packageNum = 0;
-          //put to sleep here -- deepsleep/ sleep ? --> watchdog ?
-        }
-        deviceState = DEVICE_STATE_CYCLE;
-        break;
-      }
-
-    case DEVICE_STATE_CYCLE:
-      {
-        // Schedule next packet transmission
-        txDutyCycleTime = appTxDutyCycle + randr( 0, APP_TX_DUTYCYCLE_RND );
-        LoRaWAN.cycle(txDutyCycleTime);
-        deviceState = DEVICE_STATE_SLEEP;
-        break;
-      }
-    case DEVICE_STATE_SLEEP:
-      {
-        LoRaWAN.sleep();
-        break;
-      }
-    default:
-      {
-        deviceState = DEVICE_STATE_INIT;
-        break;
-      }
+  delay(100);
+  if (lowpower) {
+    lowPowerHandler();
   }
+  else if (!lowpower) {
+    switch ( deviceState )
+    {
+      case DEVICE_STATE_INIT:
+        {
+#if(AT_SUPPORT)
+          getDevParam();
+#endif
+          printDevParam();
+          LoRaWAN.init(loraWanClass, loraWanRegion);
+          deviceState = DEVICE_STATE_JOIN;
+          break;
+        }
+      case DEVICE_STATE_JOIN:
+        {
+          LoRaWAN.join();
+          break;
+        }
+      case DEVICE_STATE_SEND:
+        {
+          if (packageNum == 0 )
+          {
+            get_sensor_data();
+          }
 
+          delay(500);
+          prepareTxFrame(appPort, packageNum);
+          LoRaWAN.send();
+          packageNum++;
+          if (packageNum == 8) //change this to 9 if you want to add two more connectors
+          {
+            onSleep();
+          }
+          deviceState = DEVICE_STATE_CYCLE;
+          break;
+        }
 
+      case DEVICE_STATE_CYCLE:
+        {
+          // Schedule next packet transmission
+          txDutyCycleTime = appTxDutyCycle + randr( 0, APP_TX_DUTYCYCLE_RND );
+          LoRaWAN.cycle(txDutyCycleTime);
+          deviceState = DEVICE_STATE_SLEEP;
+          break;
+        }
+      case DEVICE_STATE_SLEEP:
+        {
+          LoRaWAN.sleep();
+          break;
+        }
+      default:
+        {
+          deviceState = DEVICE_STATE_INIT;
+          break;
+        }
+    }
+  }
 
 
 }
