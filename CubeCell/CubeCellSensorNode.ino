@@ -685,7 +685,7 @@ void loop()
           prepareTxFrame(appPort, packageNum);
           LoRaWAN.send();
           packageNum++;
-          if (packageNum == 8) //change this to 9 if you want to add two more connectors
+          if (packageNum == 7) //change this to 9 if you want to add two more connectors
           {
             onSleep();
           }
